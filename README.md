@@ -6,10 +6,11 @@ It's a simple background process built with .NET, ideal for automating daily int
 1. Clone this repository
 2. Restore dependencies:
 ```bash
-    dotnet restore
+dotnet restore
 ```
 3. Run the application:
 ```bash
-    dotnet run
+dotnet run
 ```
+
 The worker will execute the request and then finish.
