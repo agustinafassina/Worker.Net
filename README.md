@@ -4,7 +4,8 @@ It's a simple background process built with .NET, ideal for automating daily int
 
 ## How to run locally
 1. Clone this repository
-2. Restore dependencies:
+2. Restore dependencies
+
 ```bash
 dotnet restore
 ```
