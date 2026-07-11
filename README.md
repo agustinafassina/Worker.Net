@@ -9,9 +9,32 @@ It's a simple background process built with .NET, ideal for automating daily int
 ```bash
 dotnet restore
 ```
+
 3. Run the application:
+
 ```bash
 dotnet run
 ```
 
 The worker will execute the request and then finish.
+
+## Build
+Build the solution:
+
+```bash
+dotnet build Worker.Recurrence.sln
+```
+
+## Tests
+Run unit tests:
+
+```bash
+dotnet test Worker.SendNotification.Tests/Worker.SendNotification.Tests.csproj
+```
+
+If you hit build issues with stale artifacts, clean first and run tests again:
+
+```bash
+dotnet clean Worker.Recurrence.sln
+dotnet test Worker.SendNotification.Tests/Worker.SendNotification.Tests.csproj
+```
