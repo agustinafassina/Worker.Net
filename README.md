@@ -30,21 +30,32 @@ flowchart TD
 ```bash
 dotnet restore
 ```
+
 3. Run the application:
+
 ```bash
 dotnet run
 ```
 
 The worker will execute the request and then finish.
-1. Clone this repository
-2. Restore dependencies
+
+## Build
+Build the solution:
 
 ```bash
-dotnet restore
-```
-3. Run the application:
-```bash
-dotnet run
+dotnet build Worker.Recurrence.sln
 ```
 
-The worker will execute the request and then finish.
+## Tests
+Run unit tests:
+
+```bash
+dotnet test Worker.SendNotification.Tests/Worker.SendNotification.Tests.csproj
+```
+
+If you hit build issues with stale artifacts, clean first and run tests again:
+
+```bash
+dotnet clean Worker.Recurrence.sln
+dotnet test Worker.SendNotification.Tests/Worker.SendNotification.Tests.csproj
+```
