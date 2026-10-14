@@ -1,9 +1,7 @@
-# Daily HTTP Request Worker
-This worker is designed to run daily at 3 AM and perform an HTTP request to an external API. 
-It's a simple background process built with .NET, ideal for automating daily integrations or data pulls.
+# Worker.SendNotification
+A .NET 10 background worker that GETs an external API on a daily schedule or a fixed interval.
 
-## How it works
-
+## 🗺️ How it works
 ```mermaid
 flowchart TD
     A[Start Worker] --> B{DelayTimeToStart > 0?}
@@ -23,39 +21,60 @@ flowchart TD
     L --> G
 ```
 
-## How to run locally
-1. Clone this repository
-2. Restore dependencies
+## 📦 Requirements
+- 🟦 [.NET 10 SDK](https://dotnet.microsoft.com/download)
+
+## 🗂️ Solution
+`Worker.Recurrence.sln` has two projects:
+
+```text
+.
+├── Worker.Recurrence.sln
+├── Worker.SendNotification.csproj   # worker
+├── Program.cs
+├── WorkerService.cs
+├── Configuration/
+│   ├── ExternalApi.cs
+│   └── HostedSetting.cs
+├── appsettings.json
+├── appsettings.Development.json
+└── Worker.SendNotification.Tests/
+    └── Worker.SendNotification.Tests.csproj
+```
+
+## ▶️ Run locally
+From the repo root:
 
 ```bash
 dotnet restore
+dotnet run --project Worker.SendNotification.csproj
 ```
 
-3. Run the application:
-
-```bash
-dotnet run
-```
-
-The worker will execute the request and then finish.
-
-## Build
-Build the solution:
+It keeps running until you stop it (Ctrl+C). Local runs use `DOTNET_ENVIRONMENT=Development` from `Properties/launchSettings.json`, so `appsettings.Development.json` overrides `appsettings.json`.
 
 ```bash
 dotnet build Worker.Recurrence.sln
-```
-
-## Tests
-Run unit tests:
-
-```bash
 dotnet test Worker.SendNotification.Tests/Worker.SendNotification.Tests.csproj
 ```
 
-If you hit build issues with stale artifacts, clean first and run tests again:
+## ⚙️ Configuration
+Settings live in `appsettings.json` (and `appsettings.Development.json` locally).
 
-```bash
-dotnet clean Worker.Recurrence.sln
-dotnet test Worker.SendNotification.Tests/Worker.SendNotification.Tests.csproj
-```
+**ExternalApi** - URL the worker GETs (`BaseAddress` + `Path`):
+
+| Key | Default (`appsettings.json`) |
+| --- | --- |
+| `BaseAddress` | `https://jsonplaceholder.typicode.com/` |
+| `Path` | `posts` |
+
+That is `GET https://jsonplaceholder.typicode.com/posts`.
+
+**HostedSetting** - when it runs:
+
+| Key | Meaning |
+| --- | --- |
+| `DelayTimeToStart` | Seconds to wait before the first run |
+| `DailyTime` | If a valid `HH:mm:ss` (default `03:00:00`), run once a day at that time |
+| `TimeBetweenExecution` | Milliseconds between runs when `DailyTime` is missing or invalid (default `86400000` = 24h) |
+
+HTTP calls use a 30s timeout and Polly retries (3 attempts, exponential backoff). This is a worker host, not a web API - no listen port, Swagger, or HTTP health URL.
