@@ -13,7 +13,8 @@ builder.Services.AddHttpClient<WorkerService>(client =>
 {
     client.Timeout = TimeSpan.FromSeconds(30);
 })
-.AddPolicyHandler(GetRetryPolicy());
+.AddPolicyHandler((services, _) =>
+    GetRetryPolicy(services.GetRequiredService<ILogger<WorkerService>>()));
 
 // Configure settings with validation
 builder.Services.AddOptions<ExternalApi>()
@@ -41,16 +42,20 @@ logger.LogInformation("Worker application starting...");
 
 host.Run();
 
-static IAsyncPolicy<HttpResponseMessage> GetRetryPolicy()
+// Retries only transient failures (network errors, 5xx, 408). Other 4xx responses are not retried.
+static IAsyncPolicy<HttpResponseMessage> GetRetryPolicy(ILogger logger)
 {
     return HttpPolicyExtensions
         .HandleTransientHttpError()
-        .OrResult(msg => !msg.IsSuccessStatusCode)
         .WaitAndRetryAsync(
             retryCount: 3,
             sleepDurationProvider: retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)),
-            onRetry: (outcome, timespan, retryCount, context) =>
+            onRetry: (outcome, timespan, retryCount, _) =>
             {
-                // Logging will be handled by the service itself
+                logger.LogWarning(
+                    "Retry {RetryCount} in {Delay}s after {Reason}",
+                    retryCount,
+                    timespan.TotalSeconds,
+                    outcome.Exception?.Message ?? $"status {(int)outcome.Result.StatusCode}");
             });
 }

@@ -77,4 +77,4 @@ That is `GET https://jsonplaceholder.typicode.com/posts`.
 | `DailyTime` | If a valid `HH:mm:ss` (default `03:00:00`), run once a day at that time |
 | `TimeBetweenExecution` | Milliseconds between runs when `DailyTime` is missing or invalid (default `86400000` = 24h) |
 
-HTTP calls use a 30s timeout and Polly retries (3 attempts, exponential backoff). This is a worker host, not a web API - no listen port, Swagger, or HTTP health URL.
+HTTP calls use a 30s timeout and Polly retries transient failures only (network errors, 5xx, 408): up to 3 retries with exponential backoff (2s, 4s, 8s). Other 4xx responses are not retried. This is a worker host, not a web API - no listen port, Swagger, or HTTP health URL.
